@@ -17,29 +17,6 @@ app.get("/", async (req, res) => {
   res.send({ hello: "world" });
 });
 
-app.get("/recipes", async (req, res) => {
-  const { ingredient } = req.query;
-  if (!ingredient) {
-    try {
-      const recipes = await prisma.recipe.findMany({
-        select: {
-          id: true,
-          name: true,
-          category: true,
-          cookingTime: true,
-        },
-      });
-
-      res.status(201).json({ recipes });
-    } catch (error) {
-      console.error(error);
-      res
-        .status(501)
-        .json({ message: "Something went wrong while getting the recipes." });
-    }
-  }
-});
-
 app.post("/recipes", async (req, res) => {
   const { name, description, cooking_time, category, ingredients } = req.body;
 
@@ -73,97 +50,29 @@ app.post("/recipes", async (req, res) => {
   }
 });
 
-app.get("/recipes/search", async (req, res) => {
-  const { ingredient } = req.query;
-
+app.get("/recipes", async (req, res) => {
   try {
     const recipes = await prisma.recipe.findMany({
-      where: {
-        ingredients: {
-          some: {
-            ingredient: {
-              name: {
-                contains: ingredient,
-                mode: "insensitive",
-              },
-            },
-          },
-        },
-      },
       select: {
         id: true,
         name: true,
-        cookingTime: true,
         category: true,
+        cookingTime: true,
       },
     });
 
-    res.status(200).json(recipes);
+    res.status(201).json({ recipes });
   } catch (error) {
     console.error(error);
     res
-      .status(500)
-      .json({ message: "Something went wrong while fetching the recipe." });
+      .status(501)
+      .json({ message: "Something went wrong while getting the recipes." });
   }
-});
-
-app.get("/recipes/category/:category", async (req, res) => {
-  const { category } = req.params;
-
-  const recipes = await prisma.recipe
-    .findMany({
-      where: {
-        category: {
-          equals: category,
-          mode: "insensitive",
-        },
-      },
-      select: {
-        id: true,
-        name: true,
-        cookingTime: true,
-      },
-    })
-    .catch((error) => {
-      console.error(error);
-      return res.status(500).json({
-        message: "Something went wrong while fetching the recipe by category.",
-      });
-    });
-
-  res.status(200).json(recipes);
-});
-
-app.get("/recipes/filter", async (req, res) => {
-  const { max_time } = req.query;
-
-  const recipes = await prisma.recipe
-    .findMany({
-      where: {
-        cookingTime: {
-          lte: parseInt(max_time),
-        },
-      },
-      select: {
-        id: true,
-        name: true,
-        cookingTime: true,
-      },
-    })
-    .catch((error) => {
-      console.error(error);
-      return res
-        .status(500)
-        .json({
-          message: "Something went wrong while fetching filtered recipes.",
-        });
-    });
-
-  res.status(200).json(recipes);
 });
 
 app.get("/recipes/:id", async (req, res) => {
   const { id } = req.params;
+
   try {
     const recipe = await prisma.recipe.findUnique({
       where: {
@@ -182,7 +91,9 @@ app.get("/recipes/:id", async (req, res) => {
       },
     });
 
-    if (!recipe) return res.status(404).json({ message: "Recipe not found!" });
+    if (!recipe) {
+      return res.status(404).json({ message: "Recipe not found" });
+    }
 
     const formattedRecipe = {
       id: recipe.id,
@@ -190,18 +101,18 @@ app.get("/recipes/:id", async (req, res) => {
       description: recipe.description,
       cooking_time: recipe.cookingTime,
       category: recipe.category,
-      ingredients: recipe.ingredients.map((ingredient) => ({
-        name: ingredient.ingredient.name,
-        quantity: ingredient.quantity,
+      ingredients: recipe.ingredients.map((ing) => ({
+        name: ing.ingredient.name,
+        quantity: ing.quantity,
       })),
     };
 
     res.status(200).json(formattedRecipe);
   } catch (error) {
     console.error(error);
-    res.status(500).json({
-      message: "Something went wrong while getting the recipe by id.",
-    });
+    res
+      .status(500)
+      .json({ message: "Something went wrong while getting the recipe." });
   }
 });
 
@@ -258,12 +169,46 @@ app.delete("/recipes/:id", async (req, res) => {
       },
     });
 
-    res.status(200).json({ message: "Recipe deleted successfully." });
+    res.status(200).json({ message: "Recipe deleted successfully" });
   } catch (error) {
     console.error(error);
     res
       .status(500)
       .json({ message: "Something went wrong while deleting the recipe." });
+  }
+});
+
+app.get("/recipes/search", async (req, res) => {
+  const { ingredient } = req.query;
+
+  try {
+    const recipes = await prisma.recipe.findMany({
+      where: {
+        ingredients: {
+          some: {
+            ingredient: {
+              name: {
+                contains: ingredient,
+                mode: "insensitive",
+              },
+            },
+          },
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        cookingTime: true,
+        category: true,
+      },
+    });
+
+    res.status(200).json(recipes);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Something went wrong while searching for recipes.",
+    });
   }
 });
 
