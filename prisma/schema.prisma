@@ -18,9 +18,11 @@ model Recipe {
   name        String
   description String
   cookingTime Int
-  category    String
+  category    String?
   ingredients RecipeIngredient[]
   createdAt   DateTime           @default(now())
+  newCategory Category?          @relation(fields: [categoryId], references: [id])
+  categoryId  Int?
 }
 
 model Ingredient {
@@ -37,4 +39,17 @@ model RecipeIngredient {
   ingredient   Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
   ingredientId Int
   quantity     String
+}
+
+model Category {
+  id     Int      @id @default(autoincrement())
+  name   String
+  Recipe Recipe[]
+}
+
+model ApiKey {
+  id        Int      @id @default(autoincrement())
+  apiKey    String   @unique
+  createdAt DateTime @default(now())
+  revoked   Boolean  @default(false)
 }
