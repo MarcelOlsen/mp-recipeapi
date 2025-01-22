@@ -53,3 +53,8 @@ model ApiKey {
   createdAt DateTime @default(now())
   revoked   Boolean  @default(false)
 }
+
+model Session {
+  id             String   @id
+  expirationDate DateTime
+}

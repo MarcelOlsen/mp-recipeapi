@@ -13,15 +13,14 @@ export const validateApiKey = async (req, res, next) => {
     return res.status(401).json({ message: "API key is required." });
   }
 
-  const doesApiKeyExist = await prisma.apiKey.findFirst({
+  const isApiKeyValid = await prisma.apiKey.findFirst({
     where: {
       apiKey: apiKey,
+      revoked: false,
     },
   });
 
-  console.log(doesApiKeyExist);
-
-  if (!doesApiKeyExist)
+  if (!isApiKeyValid)
     return res.status(401).json({ message: "Inavlid API key provided." });
 
   next();
