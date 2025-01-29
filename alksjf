@@ -1,0 +1,35 @@
+JWT - Json Web Token
+
+Header.Payload.Signature
+
+Header ->
+
+const jwtHeader = {
+    "alg": "HS256",
+    "typ": "JWT"
+}
+const header = jwtHeader.stringify()
+base64(header) => b64Header
+
+=>
+
+lasjhfoqiufhqoifbasokjfbldfjb.Payload.Signature
+
+Payload ->
+
+const jwtPayload = {
+    id: 1
+    username: "testuser"
+    role: "admin"
+    expirationDate: 12508251234
+}
+
+lasjhfoqiufhqoifbasokjfbldfjb.alkkjashflkasjhflaskjfhalksfdjhak.
+
+Signature ->
+
+hmacsha256(lasjhfoqiufhqoifbasokjfbldfjb.alkkjashflkasjhflaskjfhalksfdjhak, secret)
+
+asldkjfaldfkj_ja@askjgnaslfkjan
+
+lasjhfoqiufhqoifbasokjfbldfjb.alkkjashflkasjhflaskjfhalksfdjhak.asldkjfaldfkj_ja@askjgnaslfkjan
